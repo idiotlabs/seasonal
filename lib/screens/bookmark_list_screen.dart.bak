@@ -1,0 +1,40 @@
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+
+import '../models/bookmark.dart';
+import '../prefs/bookdmark_sharedpreferences.dart';
+
+class BookmarkListScreen extends StatefulWidget {
+  const BookmarkListScreen({super.key});
+
+  @override
+  State<BookmarkListScreen> createState() => _BookmarkListScreenState();
+}
+
+class _BookmarkListScreenState extends State<BookmarkListScreen> {
+  final BookmarkSharedPreferences bookmarkSharedPreferences = BookmarkSharedPreferences();
+  List<Bookmark> bookmarks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookmarks();
+  }
+
+  void _loadBookmarks() async {
+    List<Bookmark> loadedBookmarks = await bookmarkSharedPreferences.getBookmarks();
+    setState(() {
+      bookmarks = loadedBookmarks;
+
+      bookmarks.forEach((element) {
+        print(element.toJson());
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold();
+  }
+}

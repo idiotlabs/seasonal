@@ -1,4 +1,4 @@
-package idiotlabs.seasonal.seasonal
+package idiotlabs.seasonal
 
 import io.flutter.embedding.android.FlutterActivity
 

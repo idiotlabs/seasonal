@@ -1,10 +1,39 @@
-import 'dart:convert';
-import 'dart:developer';
-
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'firebase_options.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:seasonal/screens/list_screen.dart';
+import 'package:seasonal/screens/tab_screen.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  await dotenv.load(fileName: ".env");
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Firebase Crashlytics
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  // Google Admob
+  MobileAds.instance.initialize();
+
+  await SentryFlutter.init(
+        (options) {
+      options.dsn = 'https://b29cf7c2eb564e1184a155a90a43aaa7@o275739.ingest.sentry.io/4504779956486144';
+      // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+      // We recommend adjusting this value in production.
+      options.tracesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(MyApp()),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,120 +41,72 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter View',
       theme: ThemeData(
-        primarySwatch: Colors.grey,
+        useMaterial3: true,
+        colorSchemeSeed: Colors.green,
       ),
-      home: const MyHomePage(),
+      // home: const ListScreen(),
+      home: const TabScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  // variable to call and store future list of posts
-  // Future<List> goodsFuture = getGoods();
-  List goods = [];
-
-  // function to fetch data from api and return future list of posts
-  getGoods() async {
-    var url = Uri.parse("https://3u553ufx3k.execute-api.ap-northeast-2.amazonaws.com/dev/goods");
-    final response = await http.get(url, headers: {"Content-Type": "application/json"});
-    // log(response.body);
-    // final List body = json.decode(response.body);
-
-    goods = json.decode(response.body);
-    // log(goods.toString());
-
-    // return body.map((e) => Post.fromJson(e)).toList();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    getGoods();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const title = 'Basic List';
-
-    // final List<String> entries = <String>['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C'];
-    // final List<int> colorCodes = <int>[600, 500, 100, 100, 100, 100, 100, 100, 100];
-
-    return MaterialApp(
-      title: title,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(title),
-        ),
-        body: ListView.builder(
-            padding: const EdgeInsets.all(5),
-            itemCount: goods.length,
-            itemBuilder: (BuildContext context, int index) {
-              log(goods[index].toString());
-
-              return Container(
-                height: 105,
-                margin: const EdgeInsets.all(5.0),
-                padding: const EdgeInsets.all(15),
-                // color: Colors.amber[colorCodes[index]],
-                color: Colors.grey,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset('assets/busa.png', width: 75, height: 75),
-                      const SizedBox(width: 10),
-                      Expanded(
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  goods[index]['name'],
-                                  style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                                ),
-                                Row(children: <Widget>[
-                                  // container 12개 필요한데 for를 쓸 수 없나?
-                                  // - 네네 for문을 {} 안에 감싸면 안돼서
-                                  // - for 밑에 딱 하나의 선언문만 들어갈 수 있어요
-                                  // - 그래서 여러개 하고 싶으면 따로 메서드로 뺴서 그 메서드를 호출해야해요
-                                  for (int i = 1; i <= 12; i++)
-                                    Container(
-                                      margin: const EdgeInsets.only(right: 2.0),
-                                      height: 20,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(width: 1, color: Colors.red),
-                                        color: (i == 1) ? Colors.red : Colors.transparent,
-                                      ),
-                                      child: Center(
-                                        // text에 const가 붙고 안붙고는 어떤 차이가 있을까?
-                                          child: Text(
-                                              '$i',
-                                              style: TextStyle(
-                                                  fontSize: 12.0,
-                                                  color: (i > 9) ? Colors.white : Colors.black,
-                                                  fontWeight: (i > 9) ? FontWeight.bold : FontWeight.normal
-                                              )
-                                          )
-                                      ),
-                                    ),
-                                ]),
-                              ])),
-                      Text('>'),
-                    ]),
-              );
-            }),
-      ),
-    );
-  }
-}
+// class MyHomePage extends StatefulWidget {
+//   const MyHomePage({super.key});
+//
+//   @override
+//   State<MyHomePage> createState() => _MyHomePageState();
+// }
+//
+// class _MyHomePageState extends State<MyHomePage> {
+//   late Future<List> _goodData;
+//
+//   Future<List> getGoods() async {
+//     log('Start getGoods()');
+//
+//     var token = Constants.apiToken;
+//
+//     var url = Uri.parse("${Constants.apiBaseUrl}/dev/goods");
+//     final response = await http.get(url, headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': 'Bearer $token',
+//     });
+//
+//     return json.decode(response.body);
+//   }
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//
+//     _goodData = getGoods();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     const title = '제철음식';
+//
+//     // 처음 시작할때 API가 느리면 listview에 아무것도 나오지 않음
+//     // - FutureBuilder 사용 추가
+//     return Scaffold(
+//         appBar: AppBar(
+//           title: const Text(title),
+//           elevation: 1,
+//           shadowColor: Theme.of(context).shadowColor,
+//         ),
+//         body: FutureBuilder(
+//             future: _goodData,
+//             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+//               var goods = snapshot.data ?? [];
+//
+//               switch (snapshot.connectionState) {
+//                 case ConnectionState.waiting:
+//                   return const Center(child: CircularProgressIndicator());
+//                 default:
+//                   return HomeListViewWidget(goods: goods);
+//               }
+//             }
+//         )
+//     );
+//   }
+// }
