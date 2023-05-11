@@ -43,7 +43,7 @@
             android:value="2" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8206166796422159~2440742146"/>
+            android:value="ca-app-pub-8206166796422159~5135681453"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>

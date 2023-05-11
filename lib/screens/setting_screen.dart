@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,7 +29,9 @@ class _SettingScreenState extends State<SettingScreen> {
   // 광고 로드
   void _createInterstitialAd() {
     InterstitialAd.load(
-        adUnitId: 'ca-app-pub-8206166796422159/6836935110',
+        adUnitId: Platform.isAndroid
+            ? 'ca-app-pub-8206166796422159/1336440199'
+            : 'ca-app-pub-8206166796422159/6836935110',
         request: request,
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
