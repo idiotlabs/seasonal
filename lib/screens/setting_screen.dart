@@ -35,11 +35,10 @@ class _SettingScreenState extends State<SettingScreen> {
         request: request,
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
-            print('$ad loaded');
             _interstitialAd = ad;
           },
           onAdFailedToLoad: (LoadAdError error) {
-            print('InterstitialAd failed to load: $error');
+
           },
         )
     );
@@ -47,8 +46,6 @@ class _SettingScreenState extends State<SettingScreen> {
 
   void _showInterstitialAd() {
     if (_interstitialAd == null) {
-      print('Warning: attempt to show interstitial before loaded.');
-
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -71,15 +68,16 @@ class _SettingScreenState extends State<SettingScreen> {
     }
 
     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-      onAdShowedFullScreenContent: (InterstitialAd ad) =>
-          print('ad onAdShowedFullScreenContent.'),
+      onAdShowedFullScreenContent: (InterstitialAd ad) {
+        // print('ad onAdShowedFullScreenContent.')
+      },
       onAdDismissedFullScreenContent: (InterstitialAd ad) {
-        print('$ad onAdDismissedFullScreenContent.');
+        // print('$ad onAdDismissedFullScreenContent.');
         ad.dispose();
         _createInterstitialAd();
       },
       onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-        print('$ad onAdFailedToShowFullScreenContent: $error');
+        // print('$ad onAdFailedToShowFullScreenContent: $error');
         ad.dispose();
         _createInterstitialAd();
       },

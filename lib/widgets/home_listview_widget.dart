@@ -9,7 +9,7 @@ class HomeListViewWidget extends StatelessWidget {
     required this.goods,
   });
 
-  final goods;
+  final List goods;
 
   @override
   Widget build(BuildContext context) {
