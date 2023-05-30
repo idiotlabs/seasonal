@@ -22,7 +22,7 @@ class HomeListViewWidget extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    DetailScreen(index: goods[index]['id'], goods: goods[index])),
+                    DetailScreen(index: goods[index]['id'], food: goods[index])),
           );
         },
         child: Container(
