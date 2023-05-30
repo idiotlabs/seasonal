@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:seasonal/screens/bookmark_list_screen.dart.bak';
 import 'package:seasonal/screens/list_screen.dart';
 import 'package:seasonal/screens/setting_screen.dart';
 
@@ -58,10 +56,5 @@ class _TabScreenState extends State<TabScreen> with SingleTickerProviderStateMix
         showUnselectedLabels: false,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:seasonal/models/bookmark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +8,6 @@ class BookmarkSharedPreferences {
   Future<List<Bookmark>> getBookmarks() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? json = prefs.getString(_key);
-    print('${json}');
     if (json != null) {
       List<dynamic> list = jsonDecode(json);
       return list.map((e) => Bookmark.fromJson(e)).toList();
@@ -29,7 +27,6 @@ class BookmarkSharedPreferences {
     List<Bookmark> bookmarks = await getBookmarks();
     bookmarks.add(bookmark);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('${bookmarks}');
     prefs.setString(_key, jsonEncode(bookmarks.map((e) => e.toJson()).toList()));
   }
 

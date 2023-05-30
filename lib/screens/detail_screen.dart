@@ -3,66 +3,65 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:seasonal/helpers/database.dart';
 import 'package:seasonal/models/bookmark.dart';
 import 'package:seasonal/prefs/bookdmark_sharedpreferences.dart';
+import 'package:seasonal/repositories/food_repository.dart';
 
 import '../config/constants.dart';
+import '../models/food.dart';
 
 class DetailScreen extends StatefulWidget {
   final int index;
-  final Map<String, dynamic> goods;
+  final Map<String, dynamic> food;
 
-  const DetailScreen({super.key, required this.index, required this.goods});
+  const DetailScreen({super.key, required this.index, required this.food});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
-class Good {
-  final int id;
-  final String name;
-  final String description;
-  final String image;
-  final List months;
-
-  const Good({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.image,
-    required this.months,
-  });
-
-  factory Good.fromJson(Map<String, dynamic> json) {
-    return Good(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      image: json['image'],
-      months: json['months'],
-    );
-  }
-}
-
 class _DetailScreenState extends State<DetailScreen> {
-  late Future<Good> _goodData;
   final BookmarkSharedPreferences bookmarkSharedPreferences = BookmarkSharedPreferences();
+  final FoodRepository _foodRepository = FoodRepository();
+  final _model = DatabaseHelper();
+
+  late Future<Food> _foodData;
+
   bool isBookmark = false;
 
-  Future<Good> getGoodOne() async {
+  Future<Food> _getFood() async {
+    var foodId = widget.index;
+
+    // select
+    var food = await _foodRepository.select(await _model.database, foodId);
+
+    if (food != null) {
+      return food;
+    }
+
+    food = await _getFoodByApi(foodId);
+
+    // insert
+    _foodRepository.insert(await _model.database, food);
+
+    return food;
+  }
+
+  Future<Food> _getFoodByApi(foodId) async  {
     var token = Constants.apiToken;
 
-    var url = Uri.parse("${Constants.apiBaseUrl}/dev/goods/${widget.index}");
+    var url = Uri.parse("${Constants.apiBaseUrl}/dev/goods/${foodId}");
     final response = await http.get(url, headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     });
 
-    return Good.fromJson(json.decode(response.body));
+    return Food.fromJson(json.decode(response.body));
   }
 
   Future<void> _checkBookmark() async {
-    int hasBookmark = await bookmarkSharedPreferences.hasBookmark(Bookmark(goodList: widget.goods['id']));
+    int hasBookmark = await bookmarkSharedPreferences.hasBookmark(Bookmark(goodList: widget.food['id']));
 
     setState(() {
       isBookmark = hasBookmark >= 0;
@@ -71,9 +70,11 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   void initState() {
+    log('detail_screen initState()');
     super.initState();
 
-    _goodData = getGoodOne();
+    _foodData = _getFood();
+
     _checkBookmark();
   }
 
@@ -88,7 +89,7 @@ class _DetailScreenState extends State<DetailScreen> {
           slivers: <Widget>[
             SliverAppBar(
               pinned: true,
-              title: Text('${widget.goods['name']}',
+              title: Text('${widget.food['name']}',
                   style: const TextStyle(
                       // color: Colors.black,
                       // fontSize: 20,
@@ -132,7 +133,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     Image.network(
-                      '${Constants.imageBaseUrl}/${widget.goods['image']}',
+                      '${Constants.imageBaseUrl}/${widget.food['image']}',
                       fit: BoxFit.cover,
                     ),
                     const DecoratedBox(
@@ -156,7 +157,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(25),
                   child: FutureBuilder(
-                      future: _goodData,
+                      future: _foodData,
                       builder:
                       (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                         var goods = snapshot.data ?? [];
